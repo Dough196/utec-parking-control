@@ -41,7 +41,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: parking-control
+      MYSQL_DATABASE: parking_control
       MYSQL_ROOT_PASSWORD: root123
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql

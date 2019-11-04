@@ -1,5 +1,6 @@
 <?php
 
+use App\Rol;
 use Illuminate\Http\Request;
 
 /*
@@ -13,6 +14,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('/user', function(Request $request) {
+        return $request->user();
+    });
+    Route::post('/register', 'Auth\RegisterController@register');
+    Route::post('/register-users', 'UserController@registerUsers');
+    Route::post('/logout', 'Auth\LoginController@logout');
+});
+
+Route::group(['middleware' => 'guest:api'], function () {
+    Route::post('/login', 'Auth\LoginController@login');
 });
