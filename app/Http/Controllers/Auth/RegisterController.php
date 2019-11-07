@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use App\Reserva;
+use App\Edificio;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -42,6 +46,22 @@ class RegisterController extends Controller
     }
 
     /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        return $this->registered($request, $user)
+                        ?: redirect($this->redirectPath());
+    }
+
+    /**
      * Get a validator for an incoming registration request.
      *
      * @param  array  $data
@@ -54,6 +74,10 @@ class RegisterController extends Controller
             'apellidos' => ['required', 'string', 'max:75'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'rol_id' => ['nullable', 'integer', 'exists:roles,id'],
+            'num_placa' => ['required_with:edificio_id', 'string', 'max:15'],
+            'edificio_id' => ['required_with:num_slot,num_placa', 'integer', 'exists:edificios,id'],
+            'num_slot' => ['nullable', 'integer'],
         ]);
     }
 
@@ -65,14 +89,37 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
-            'nombres' => $data['nombres'],
-            'apellidos' => $data['apellidos'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'rol_id' => 1,
-            'api_token' => Str::random(80)
-        ]);
+        if (!isset($data['num_placa'])  && !isset($data['edificio_id'])) {
+            return User::create([
+                'nombres' => $data['nombres'],
+                'apellidos' => $data['apellidos'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'estado' => 1,
+                'rol_id' => 1,
+                'api_token' => Str::random(80)
+            ]);
+        } else {
+            $edificio = Edificio::find($data['edificio_id']);
+            $edificio->num_disponible = $edificio->num_disponible - 1;    
+            $edificio->num_ocupado = $edificio->num_ocupado + 1;
+            $edificio->num_reservados = isset($data['num_slot']) ? $edificio->num_reservados + 1 : $edificio->num_reservados;
+            $edificio->reservas()->save(new Reserva([
+                'estado' => 1,
+                'num_slot' => isset($data['num_slot']) ? $data['num_slot'] : null
+            ]));
+            $edificio->save();
+            return User::create([
+                'nombres' => $data['nombres'],
+                'apellidos' => $data['apellidos'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'estado' => 1,
+                'rol_id' => $data['rol_id'],
+                'reserva_id' => $edificio->reservas()->latest()->first()->id,
+                'api_token' => Str::random(80)
+            ]);
+        }
     }
 
     protected function registered(Request $request, $user)

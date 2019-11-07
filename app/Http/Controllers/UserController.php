@@ -11,6 +11,16 @@ class UserController extends Controller
         $this->middleware('auth:api');
     }
 
+    public function index()
+    {
+        return User::with('rol')->get();
+    }
+
+    public function show(Request $request)
+    {
+        return User::findOrFail($request->id);
+    }
+
     public function registerUsers()
     {
         $errors = [];

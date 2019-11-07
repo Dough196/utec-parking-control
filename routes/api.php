@@ -19,8 +19,13 @@ Route::group(['middleware' => 'auth:api'], function () {
         return $request->user();
     });
     Route::post('/register', 'Auth\RegisterController@register');
+    Route::get('/users', 'UserController@index');
+    Route::get('/users/{id}', 'UserController@show');
     Route::post('/register-users', 'UserController@registerUsers');
-    Route::post('/logout', 'Auth\LoginController@logout');
+    Route::get('/edificios', 'EdificioController@index');
+    Route::get('/edificios/{id}', 'EdificioController@show');
+    Route::get('/reservas', 'ReservaController@index');
+    Route::get('/reservas/{id}', 'ReservaController@show');
 });
 
 Route::group(['middleware' => 'guest:api'], function () {

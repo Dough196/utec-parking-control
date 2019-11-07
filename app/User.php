@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'email', 'nombres', 'apellidos', 'num_placa', 'reserva_id', 'rol_id', 'password'
+        'email', 'nombres', 'apellidos', 'num_placa', 'reserva_id', 'rol_id', 'password', 'estado'
     ];
 
     /**
@@ -51,5 +51,10 @@ class User extends Authenticatable
     public function rol()
     {
         return $this->belongsTo('App\Rol', 'rol_id', 'id');
+    }
+
+    public function reserva()
+    {
+        return $this->belongsTo('App\Reserva', 'reserva_id', 'id');
     }
 }

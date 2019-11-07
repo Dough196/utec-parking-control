@@ -20,7 +20,8 @@ class CreateAdminUser extends Seeder
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
             'estado' => 1,
-            'rol_id' => 1
+            'rol_id' => 1,
+            'api_token' => Str::random(80)
         ]);
         $this->command->info('User admin created');
     }
