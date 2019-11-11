@@ -12,8 +12,13 @@ class EdificioController extends Controller
         return Edificio::with('reservas')->get();
     }
 
+    public function list()
+    {
+        return Edificio::select(['id', 'nombre'])->get();
+    }
+
     public function show(Request $request)
     {
-        return Edificio::with('reservas')->findOrFail($request->id);
+        return Edificio::with('reservas')->find($request->id);
     }
 }

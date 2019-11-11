@@ -25,8 +25,8 @@ class CreateRoles extends Seeder
         ]);
         $this->command->info('Role Alumno created');
         Rol::firstOrCreate([
-            'nombre' => 'Invitado'
+            'nombre' => 'Vigilante'
         ]);
-        $this->command->info('Role Inivitado created');
+        $this->command->info('Role Vigilante created');
     }
 }

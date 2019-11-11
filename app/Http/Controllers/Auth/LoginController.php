@@ -47,7 +47,7 @@ class LoginController extends Controller
             $user = $this->guard()->user();
 
             return response()->json([
-                'data' => $user->toArray(),
+                'data' => $user->makeVisible('api_token')->toArray(),
             ]);
         }
 

@@ -28,7 +28,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token'
+        'password', 'remember_token', 'api_token'
     ];
 
     /**
@@ -55,6 +55,21 @@ class User extends Authenticatable
 
     public function reserva()
     {
-        return $this->belongsTo('App\Reserva', 'reserva_id', 'id');
+        return $this->belongsTo('App\Reserva', 'reserva_id', 'id')->with('edificio');
+    }
+
+    public function horarios()
+    {
+        return $this->hasMany('App\Horario');
+    }
+
+    public function historial()
+    {
+        return $this->hasMany('App\Historial');
+    }
+
+    public function lastHistorial()
+    {
+        return $this->historial()->latest()->first();
     }
 }

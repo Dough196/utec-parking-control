@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Historial;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -18,7 +20,40 @@ class UserController extends Controller
 
     public function show(Request $request)
     {
-        return User::findOrFail($request->id);
+        return User::with('rol')->find($request->id);
+    }
+
+    public function getUserByPlaca(Request $request)
+    {
+        $this->validate($request, [
+            'num_placa' => ['required', 'string', 'max:15']
+        ]);
+        $user = User::with('reserva')->with('historial')->where('num_placa', $request->num_placa)->first();
+
+        return response()->json($user);
+    }
+
+    public function validateEntry(Request $request)
+    {
+        $this->validate($request, [
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'edificio_id' => ['required', 'integer', 'exists:edificios,id']
+        ]);
+
+        $user = User::with(['historial' => function ($query) { 
+                $query->latest()->first();
+        }])->find($request->user_id);
+
+        if (!count($user->historial) || ($user->historial[0]->entrada && $user->historial[0]->salida)) {
+            $user->historial()->save(new Historial([
+                'edificio_id' => $request->edificio_id,
+                'entrada' => Carbon::now()->toTimeString(),
+                'fecha' => Carbon::today()->toDateString()
+            ]));
+            return $user;
+        } else {
+            return response()->json(['message' => 'Usuario ya se encuentra en el parqueo'], 200);
+        }
     }
 
     public function registerUsers()

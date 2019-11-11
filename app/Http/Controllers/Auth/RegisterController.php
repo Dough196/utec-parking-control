@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use App\Horario;
 use App\Reserva;
 use App\Edificio;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
@@ -75,10 +77,46 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'rol_id' => ['nullable', 'integer', 'exists:roles,id'],
-            'num_placa' => ['required_with:edificio_id', 'string', 'max:15'],
+            'num_placa' => ['required_with:edificio_id', 'string', 'max:15', 'unique:users,num_placa'],
             'edificio_id' => ['required_with:num_slot,num_placa', 'integer', 'exists:edificios,id'],
-            'num_slot' => ['nullable', 'integer'],
+            'num_slot' => $this->getSlotValidation($data),
+            'hora_entrada_lunes' => ['nullable', 'date_format:H:i'],
+            'hora_salida_lunes' => ['required_with:hora_entrada_lunes', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_martes' => ['nullable', 'date_format:H:i'],
+            'hora_salida_martes' => ['required_with:hora_entrada_martes', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_miercoles' => ['nullable', 'date_format:H:i'],
+            'hora_salida_miercoles' => ['required_with:hora_entrada_miercoles', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_jueves' => ['nullable', 'date_format:H:i'],
+            'hora_salida_jueves' => ['required_with:hora_entrada_jueves', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_viernes' => ['nullable', 'date_format:H:i'],
+            'hora_salida_viernes' => ['required_with:hora_entrada_viernes', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_sabado' => ['nullable', 'date_format:H:i'],
+            'hora_salida_sabado' => ['required_with:hora_entrada_sabado', 'date_format:H:i', 'after:hora_entrada_lunes'],
+            'hora_entrada_domingo' => ['nullable', 'date_format:H:i'],
+            'hora_salida_domingo' => ['required_with:hora_entrada_domingo', 'date_format:H:i', 'after:hora_entrada_lunes'],
         ]);
+    }
+
+    /**
+     * Get a validation rules for num_slot.
+     *
+     * @param  array  $data
+     * @return array
+     */
+    protected function getSlotValidation($data)
+    {
+        if(isset($data['num_placa'])  && isset($data['edificio_id'])) {
+            $edificio = Edificio::find($data['edificio_id']);
+            if ($edificio) {
+                return [
+                    'nullable',
+                    'integer',
+                    Rule::in($edificio->slots_disponibles)
+                ];
+            } else {
+                return ['nullable'];
+            }
+        }
     }
 
     /**
@@ -101,24 +139,84 @@ class RegisterController extends Controller
             ]);
         } else {
             $edificio = Edificio::find($data['edificio_id']);
-            $edificio->num_disponible = $edificio->num_disponible - 1;    
-            $edificio->num_ocupado = $edificio->num_ocupado + 1;
+            $edificio->num_disponible = isset($data['num_slot']) ? $edificio->num_disponible - 1 : $edificio->num_disponible;
             $edificio->num_reservados = isset($data['num_slot']) ? $edificio->num_reservados + 1 : $edificio->num_reservados;
             $edificio->reservas()->save(new Reserva([
                 'estado' => 1,
-                'num_slot' => isset($data['num_slot']) ? $data['num_slot'] : null
+                'num_slot' => isset($data['num_slot']) ? $data['num_slot'] : 0
             ]));
             $edificio->save();
-            return User::create([
+
+
+            $user = User::create([
                 'nombres' => $data['nombres'],
                 'apellidos' => $data['apellidos'],
                 'email' => $data['email'],
+                'num_placa' => $data['num_placa'],
                 'password' => Hash::make($data['password']),
                 'estado' => 1,
                 'rol_id' => $data['rol_id'],
                 'reserva_id' => $edificio->reservas()->latest()->first()->id,
                 'api_token' => Str::random(80)
             ]);
+
+            if(isset($data['hora_entrada_lunes'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Lunes',
+                    'hora_entrada' => $data['hora_entrada_lunes'],
+                    'hora_salida' => $data['hora_salida_lunes']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_martes'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Martes',
+                    'hora_entrada' => $data['hora_entrada_martes'],
+                    'hora_salida' => $data['hora_salida_martes']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_miercoles'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Miercoles',
+                    'hora_entrada' => $data['hora_entrada_miercoles'],
+                    'hora_salida' => $data['hora_salida_miercoles']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_jueves'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Jueves',
+                    'hora_entrada' => $data['hora_entrada_jueves'],
+                    'hora_salida' => $data['hora_salida_jueves']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_viernes'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Viernes',
+                    'hora_entrada' => $data['hora_entrada_viernes'],
+                    'hora_salida' => $data['hora_salida_viernes']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_sabado'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Sábado',
+                    'hora_entrada' => $data['hora_entrada_sabado'],
+                    'hora_salida' => $data['hora_salida_sabado']
+                ]));
+            }
+
+            if(isset($data['hora_entrada_domingo'])) {
+                $user->horarios()->save(new Horario([
+                    'dias' => 'Domingo',
+                    'hora_entrada' => $data['hora_entrada_domingo'],
+                    'hora_salida' => $data['hora_salida_domingo']
+                ]));
+            }
+
+            return $user;
         }
     }
 
