@@ -76,7 +76,7 @@ class RegisterController extends Controller
             'apellidos' => ['required', 'string', 'max:75'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'rol_id' => ['nullable', 'integer', 'exists:roles,id'],
+            'rol_id' => ['required', 'integer', 'exists:roles,id'],
             'num_placa' => ['required_with:edificio_id', 'string', 'max:15', 'unique:users,num_placa'],
             'edificio_id' => ['required_with:num_slot,num_placa', 'integer', 'exists:edificios,id'],
             'num_slot' => $this->getSlotValidation($data),
@@ -134,7 +134,7 @@ class RegisterController extends Controller
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'estado' => 1,
-                'rol_id' => 1,
+                'rol_id' => $data['rol_id'],
                 'api_token' => Str::random(80)
             ]);
         } else {

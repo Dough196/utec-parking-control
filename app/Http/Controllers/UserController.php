@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Edificio;
 use App\Historial;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -50,9 +51,41 @@ class UserController extends Controller
                 'entrada' => Carbon::now()->toTimeString(),
                 'fecha' => Carbon::today()->toDateString()
             ]));
+            $edificio = Edificio::find($request->edificio_id);
+            $edificio->num_disponible = $edificio->num_disponible - 1;
+            $edificio->num_ocupado = $edificio->num_ocupado + 1;
+            $edificio->save();
+            return $user;
+        } elseif ($user->historial[0]->entrada && !$user->historial[0]->salida) {
+            return response()->json(['message' => 'Usuario ya se encuentra en el parqueo'], 200);
+        } else {
+            return response()->json(['message' => 'Hubo un error comuniquese con el administrador'], 200);
+        }
+    }
+
+    public function validateDeparture(Request $request)
+    {
+        $this->validate($request, [
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'comentario' => ['nullable', 'string', 'max:100']
+        ]);
+
+        $user = User::with(['historial' => function ($query) { 
+            $query->latest()->first();
+        }])->find($request->user_id);
+
+        if (count($user->historial) && ($user->historial[0]->entrada && !$user->historial[0]->salida)) {
+            $user->historial[0]->salida = Carbon::now()->toTimeString();
+            $user->historial[0]->comentario = isset($request->comentario) ?  $request->comentario : null;
+            $user->push();
+
+            $edificio = Edificio::find($user->historial[0]->edificio_id);
+            $edificio->num_disponible = $edificio->num_disponible + 1;
+            $edificio->num_ocupado = $edificio->num_ocupado - 1;
+            $edificio->save();
             return $user;
         } else {
-            return response()->json(['message' => 'Usuario ya se encuentra en el parqueo'], 200);
+            return response()->json(['message' => 'No se ha registrado una entrada para este usuario'], 200);
         }
     }
 
