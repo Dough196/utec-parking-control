@@ -5,7 +5,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class CreateAdminUser extends Seeder
+class CreateAdminUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
