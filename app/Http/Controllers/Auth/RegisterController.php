@@ -74,7 +74,8 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'nombres' => ['required', 'string', 'max:75'],
             'apellidos' => ['required', 'string', 'max:75'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'carnet' => ['required_if:rol_id,3', 'string', 'max:12', 'unique:users,carnet'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'rol_id' => ['required', 'integer', 'exists:roles,id'],
             'num_placa' => ['required_with:edificio_id', 'string', 'max:15', 'unique:users,num_placa'],
@@ -116,6 +117,8 @@ class RegisterController extends Controller
             } else {
                 return ['nullable'];
             }
+        } else {
+            return ['nullable'];
         }
     }
 

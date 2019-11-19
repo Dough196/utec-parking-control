@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -44,10 +45,10 @@ class LoginController extends Controller
         $this->validateLogin($request);
 
         if ($this->attemptLogin($request)) {
-            $user = $this->guard()->user();
+            $user = User::with('rol')->find($this->guard()->user()->id)->makeVisible(['api_token']);
 
             return response()->json([
-                'data' => $user->makeVisible('api_token')->toArray(),
+                'data' => $user->toArray(),
             ]);
         }
 
