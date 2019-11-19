@@ -16,12 +16,12 @@ class UserController extends Controller
 
     public function index()
     {
-        return User::with('rol')->get();
+        return User::with('rol')->with('horarios')->get();
     }
 
     public function show(Request $request)
     {
-        return User::with('rol')->find($request->id);
+        return User::with('rol')->with('horarios')->find($request->id);
     }
 
     public function getUserByPlaca(Request $request)
@@ -29,7 +29,7 @@ class UserController extends Controller
         $this->validate($request, [
             'num_placa' => ['required', 'string', 'max:15']
         ]);
-        $user = User::with('reserva')->with('historial')->where('num_placa', $request->num_placa)->first();
+        $user = User::with('reserva')->with('horarios')->with('historial')->where('num_placa', $request->num_placa)->first();
 
         return response()->json($user);
     }
