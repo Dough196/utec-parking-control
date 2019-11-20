@@ -9,6 +9,8 @@ class RolController extends Controller
 {
     public function index()
     {
-        return Rol::select('id', 'nombre')->get();
+        return response()->json([
+            'roles' => Rol::select('id', 'nombre')->get()
+        ], 200);
     }
 }

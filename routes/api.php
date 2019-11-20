@@ -1,6 +1,5 @@
 <?php
 
-use App\Rol;
 use Illuminate\Http\Request;
 
 /*
@@ -16,12 +15,15 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', function(Request $request) {
-        return $request->user();
+        return response()->json([
+            'data' => $request->user()
+        ], 200);
     });
 
     Route::get('/roles', 'RolController@index');
 
     Route::post('/register', 'Auth\RegisterController@register');
+    Route::post('/perfil/actualizar-contrasena', 'Auth\PasswordController@updatePassword');
     Route::get('/users', 'UserController@index');
     Route::get('/users/{id}', 'UserController@show');
     Route::get('/users-por-placa', 'UserController@getUserByPlaca');

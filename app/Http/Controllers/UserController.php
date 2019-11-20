@@ -16,12 +16,16 @@ class UserController extends Controller
 
     public function index()
     {
-        return User::with('rol')->with('horarios')->get();
+        return response()->json([
+            'usuarios' => User::with('rol')->with('reserva')->with('horarios')->get()
+        ], 200);
     }
 
     public function show(Request $request)
     {
-        return User::with('rol')->with('horarios')->find($request->id);
+        return response()->json([
+            'usuario' => User::with('rol')->with('horarios')->find($request->id)
+        ], 200);
     }
 
     public function getUserByPlaca(Request $request)
@@ -31,7 +35,9 @@ class UserController extends Controller
         ]);
         $user = User::with('reserva')->with('horarios')->with('historial')->where('num_placa', $request->num_placa)->first();
 
-        return response()->json($user);
+        return response()->json([
+            'usuario' => $user
+        ], 200);
     }
 
     public function validateEntry(Request $request)

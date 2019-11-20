@@ -152,7 +152,7 @@ return [
             'after' => 'El campo hora salida domingo debe ser una hora posterior a hora entrada domingo.',
         ],
         'carnet' => [
-            'required_if' => 'El campo carnet es obligatorio cuando el rol id es estudiante'
+            'required_if' => 'El campo carnet es obligatorio cuando el rol es estudiante'
         ]
     ],
 

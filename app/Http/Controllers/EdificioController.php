@@ -9,16 +9,22 @@ class EdificioController extends Controller
 {
     public function index()
     {
-        return Edificio::with('reservas')->get();
+        return response()->json([
+            'edificios' => Edificio::with('reservas')->get()
+        ], 200);
     }
 
     public function list()
     {
-        return Edificio::select(['id', 'nombre'])->get();
+        return response()->json([
+            'edificios' => Edificio::select(['id', 'nombre'])->get()
+        ], 200);
     }
 
     public function show(Request $request)
     {
-        return Edificio::with('reservas')->find($request->id);
+        return response()->json([
+            'edificio' => Edificio::with('reservas')->find($request->id)
+        ], 200);
     }
 }

@@ -9,11 +9,15 @@ class ReservaController extends Controller
 {
     public function index()
     {
-        return Reserva::with('user')->with('edificio')->where('num_slot', '<>', 0)->where('num_slot', '<>', null)->get();
+        return response()->json([
+            'reservas' => Reserva::with('user')->with('edificio')->where('num_slot', '<>', 0)->where('num_slot', '<>', null)->get()
+        ], 200);
     }
 
     public function show(Request $request)
     {
-        return Reserva::with('user')->with('edificio')->where('num_slot', '<>', 0)->where('num_slot', '<>', null)->find($request->id);
+        return response()->json([
+            'reserva' => Reserva::with('user')->with('edificio')->where('num_slot', '<>', 0)->where('num_slot', '<>', null)->find($request->id)
+        ], 200);
     }
 }

@@ -9,11 +9,15 @@ class HistorialController extends Controller
 {
     public function index()
     {
-        return Historial::with('user')->with('edificio')->get();
+        return response()->json([
+            'historial' => Historial::with('user')->with('edificio')->get()
+        ], 200);
     }
 
     public function show(Request $request)
     {
-        return Historial::with('user')->with('edificio')->find($request->id);
+        return response()->json([
+            'historial' => Historial::with('user')->with('edificio')->find($request->id)
+        ], 200);
     }
 }
