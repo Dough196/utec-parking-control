@@ -56,7 +56,7 @@ class LoginController extends Controller
         $this->validateLogin($request);
 
         if ($this->attemptLogin($request)) {
-            $user = User::with('rol')->find($this->guard()->user()->id)->makeVisible(['api_token']);
+            $user = User::with('rol')->with('reserva')->with('horarios')->find($this->guard()->user()->id)->makeVisible(['api_token']);
 
             return response()->json([
                 'data' => $user->toArray(),
