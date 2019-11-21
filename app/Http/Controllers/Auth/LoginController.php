@@ -31,6 +31,13 @@ class LoginController extends Controller
     protected $redirectTo = '/home';
 
     /**
+     * Login username to be used by the controller.
+     *
+     * @var string
+     */
+    protected $username;
+
+    /**
      * Create a new controller instance.
      *
      * @return void
@@ -38,17 +45,30 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+        $this->username = $this->findUsername();
     }
 
-    protected function credentials(Request $request)
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function findUsername()
     {
-        $field = filter_var($request->get($this->username()), FILTER_VALIDATE_EMAIL)
-            ? $this->username()
-            : 'carnet';
-        return [
-            $field => $request->get($this->username()),
-            'password' => $request->password,
-        ];
+        $login = request()->input('email');
+        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'carnet';
+        request()->merge([$fieldType => $login]);
+        return $fieldType;
+    }
+ 
+    /**
+     * Get username property.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return $this->username;
     }
 
     public function login(Request $request)
@@ -64,5 +84,13 @@ class LoginController extends Controller
         }
 
         return $this->sendFailedLoginResponse($request);
+    }
+
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            $this->username() => 'required|string|exists:users',
+            'password' => 'required|string',
+        ]);
     }
 }

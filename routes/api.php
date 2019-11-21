@@ -25,6 +25,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/register', 'Auth\RegisterController@register');
     Route::post('/perfil/actualizar-contrasena', 'Auth\PasswordController@updatePassword');
     Route::get('/users', 'UserController@index');
+    Route::get('/users-por-rol/{rol}', 'UserController@indexByRol');
     Route::get('/users/{id}', 'UserController@show');
     Route::get('/users-por-placa', 'UserController@getUserByPlaca');
     Route::post('/users/validar-entrada', 'UserController@validateEntry');

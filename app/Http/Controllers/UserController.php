@@ -21,6 +21,45 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function indexByRol(Request $request)
+    {
+        switch ($request->rol) {
+            case 'admin':
+                return response()->json([
+                    'usuarios' => User::with('rol')->with('reserva')->with('horarios')->whereHas('rol', function ($q) {
+                        $q->where('id', 1);
+                    })->get()
+                ], 200);
+                break;
+            case 'docente':
+                return response()->json([
+                    'usuarios' => User::with('rol')->with('reserva')->with('horarios')->whereHas('rol', function ($q) {
+                        $q->where('id', 2);
+                    })->get()
+                ], 200);
+                break;
+            case 'alumno':
+                return response()->json([
+                    'usuarios' => User::with('rol')->with('reserva')->with('horarios')->whereHas('rol', function ($q) {
+                        $q->where('id', 3);
+                    })->get()
+                ], 200);
+                break;
+            case 'vigilante':
+                return response()->json([
+                    'usuarios' => User::with('rol')->whereHas('rol', function ($q) {
+                        $q->where('id', 4);
+                    })->get()
+                ], 200);
+                break;
+            default:
+                return response()->json([
+                    'error' => 'Rol inválido'
+                ], 404);
+                break;
+        }
+    }
+
     public function show(Request $request)
     {
         return response()->json([
