@@ -38,6 +38,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/reservas', 'ReservaController@index');
     Route::get('/reservas/{id}', 'ReservaController@show');
+    Route::post('/asignar-parqueo', 'ReservaController@assignParking');
+    Route::post('/reservar-parqueo', 'ReservaController@bookParking');
+    Route::get('/reservar-dia-parqueo', 'ReservaController@bookDayParking');
 
     Route::get('/historial', 'HistorialController@index');
     Route::get('/historial/{id}', 'HistorialController@index');

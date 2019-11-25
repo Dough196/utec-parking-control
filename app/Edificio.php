@@ -10,7 +10,7 @@ class Edificio extends Model
 
     public function reservas()
     {
-        return $this->hasMany('App\Reserva')->where('num_slot', '<>', 0)->where('num_slot', '<>', null);
+        return $this->hasMany('App\Reserva');
     }
 
     protected $appends = ['slots_disponibles'];
