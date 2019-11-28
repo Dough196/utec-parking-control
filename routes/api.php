@@ -46,7 +46,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/reservar-parqueo', 'ReservaController@bookDayParking');
 
     Route::get('/historial', 'HistorialController@index');
-    Route::get('/historial/{id}', 'HistorialController@index');
+    Route::get('/historial/{id}', 'HistorialController@show');
 
 });
 
