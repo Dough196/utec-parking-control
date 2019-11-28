@@ -153,6 +153,9 @@ return [
         ],
         'carnet' => [
             'required_if' => 'El campo carnet es obligatorio cuando el rol es estudiante'
+        ],
+        'fecha' => [
+            'after_or_equal' => 'El campo fecha debe ser una fecha posterior o igual a hoy.'
         ]
     ],
 

@@ -6,15 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reserva extends Model
 {
-    protected $fillable = ['edificio_id', 'num_slot', 'estado', 'fecha'];
+    protected $fillable = ['estado', 'fecha', 'comentario'];
 
-    public function user()
+    public function users()
     {
-        return $this->hasOne('App\User');
+        return $this->belongsToMany('App\User', 'asignaciones')->withTimestamps();
     }
 
-    public function edificio()
+    public function edificios()
     {
-        return $this->belongsTo('App\Edificio');
+        return $this->belongsToMany('App\Edificio', 'asignaciones')->withTimestamps();
+    }
+
+    public function horarios()
+    {
+        return $this->hasMany('App\Horario');
+    }
+
+    public function historial()
+    {
+        return $this->hasMany('App\Historial');
+    }
+
+    public function lastHistorial()
+    {
+        return $this->historial()->latest()->first();
     }
 }

@@ -45,7 +45,7 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->username = $this->findUsername();
+        $this->username = $this->initUsername();
     }
 
     /**
@@ -53,7 +53,7 @@ class LoginController extends Controller
      *
      * @return string
      */
-    public function findUsername()
+    public function initUsername()
     {
         $login = request()->input('email');
         $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'carnet';
@@ -76,7 +76,17 @@ class LoginController extends Controller
         $this->validateLogin($request);
 
         if ($this->attemptLogin($request)) {
-            $user = User::with('rol')->with('reserva')->with('horarios')->find($this->guard()->user()->id)->makeVisible(['api_token']);
+            $user = User::with('rol')
+                ->with('reservas.edificios')
+                ->with('edificios')
+                ->find($this->guard()->user()->id)
+                ->makeVisible(['api_token']);
+            if ($user->rol_id != 5) {
+                unset($user->edificios);
+            }
+            if ($user->rol_id == 5) {
+                unset($user->reservas);
+            }
 
             return response()->json([
                 'data' => $user->toArray(),

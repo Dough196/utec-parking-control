@@ -74,26 +74,17 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'nombres' => ['required', 'string', 'max:75'],
             'apellidos' => ['required', 'string', 'max:75'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'carnet' => ['required_if:rol_id,3', 'string', 'min:12', 'max:12', 'unique:users,carnet'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'carnet' => ['required_if:rol_id,4', 'string', 'min:12', 'max:12', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'rol_id' => ['required', 'integer', 'exists:roles,id'],
             'num_placa' => [
-                Rule::requiredIf(function() use($data){
-                    return isset($data['edificio_id']) ||
-                    in_array($data['rol_id'], [1, 2, 3]);
+                Rule::requiredIf(function () use ($data){
+                    return in_array($data['rol_id'], [1, 2, 3, 4]);
                 }),
                 'string',
                 'max:15',
-                'unique:users,num_placa'
-            ],
-            'edificio_id' => [
-                Rule::requiredIf(function() use($data){
-                    return isset($data['num_placa']) &&
-                    in_array($data['rol_id'], [1, 2, 3]);
-                }),
-                'integer',
-                'exists:edificios,id'
+                'unique:users'
             ]
         ]);
     }
@@ -106,7 +97,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        if ($data['rol_id'] == 4) {
+        if ($data['rol_id'] == 5) {
             return User::create([
                 'nombres' => $data['nombres'],
                 'apellidos' => $data['apellidos'],
@@ -117,15 +108,7 @@ class RegisterController extends Controller
                 'api_token' => Str::random(80)
             ]);
         } else {
-            $edificio = Edificio::find($data['edificio_id']);
-            // $edificio->num_disponible = isset($data['num_slot']) ? $edificio->num_disponible - 1 : $edificio->num_disponible;
-            // $edificio->num_reservados = isset($data['num_slot']) ? $edificio->num_reservados + 1 : $edificio->num_reservados;
-            $edificio->reservas()->save(new Reserva([
-                'estado' => 0
-            ]));
-            $edificio->save();
-
-            $user = User::create([
+            return User::create([
                 'nombres' => $data['nombres'],
                 'apellidos' => $data['apellidos'],
                 'email' => $data['email'],
@@ -134,11 +117,8 @@ class RegisterController extends Controller
                 'password' => Hash::make($data['password']),
                 'estado' => 1,
                 'rol_id' => $data['rol_id'],
-                'reserva_id' => $edificio->reservas()->latest()->first()->id,
                 'api_token' => Str::random(80)
             ]);
-
-            return $user;
         }
     }
 

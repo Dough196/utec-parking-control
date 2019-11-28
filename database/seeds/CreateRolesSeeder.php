@@ -17,6 +17,10 @@ class CreateRolesSeeder extends Seeder
         ]);
         $this->command->info('Role Administrador created');
         Rol::firstOrCreate([
+            'nombre' => 'Personal Administrativo'
+        ]);
+        $this->command->info('Role Docente created');
+        Rol::firstOrCreate([
             'nombre' => 'Docente'
         ]);
         $this->command->info('Role Docente created');

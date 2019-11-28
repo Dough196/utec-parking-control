@@ -53,23 +53,13 @@ class User extends Authenticatable
         return $this->belongsTo('App\Rol', 'rol_id', 'id');
     }
 
-    public function reserva()
+    public function reservas()
     {
-        return $this->belongsTo('App\Reserva', 'reserva_id', 'id')->with('edificio');
+        return $this->belongsToMany('App\Reserva', 'asignaciones')->withTimestamps();
     }
 
-    public function horarios()
+    public function edificios()
     {
-        return $this->hasMany('App\Horario');
-    }
-
-    public function historial()
-    {
-        return $this->hasMany('App\Historial');
-    }
-
-    public function lastHistorial()
-    {
-        return $this->historial()->latest()->first();
+        return $this->belongsToMany('App\Edificio', 'asignaciones')->withTimestamps();
     }
 }

@@ -8,15 +8,10 @@ class Historial extends Model
 {
     protected $table = 'historial';
 
-    protected $fillable = ['user_id', 'edificio_id', 'comentario', 'entrada', 'salida', 'fecha'];
+    protected $fillable = ['reserva_id', 'comentario', 'entrada', 'salida', 'fecha', 'calificacion'];
 
-    public function user()
+    public function reserva()
     {
-        return $this->belongsTo('App\User');
-    }
-
-    public function edificio()
-    {
-        return $this->belongsTo('App\Edificio');
+        return $this->belongsTo('App\Reserva');
     }
 }
