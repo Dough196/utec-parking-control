@@ -90,7 +90,7 @@ class UserController extends Controller
         $this->validate($request, [
             'num_placa' => ['required', 'string', 'max:15']
         ]);
-        $user = User::with(['reservas.edificios', 'reservas.historial'])->where('num_placa', $request->num_placa)->first();
+        $user = User::with(['reservas.edificios', 'reservas.historial', 'reservas.horarios'])->where('num_placa', $request->num_placa)->first();
 
         return response()->json([
             'usuario' => $user
