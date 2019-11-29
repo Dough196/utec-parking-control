@@ -139,15 +139,16 @@ class UserController extends Controller
                 $q->where('num_dia', now()->dayOfWeek);
             })
             ->where('estado', 1)->first();
+        
+        if(!$reserva) {
+            return response()->json(['message' => 'No se encontró una reserva válida o una reserva para el día de hoy'], 401);
+        }
 
         if(!$reserva->lastHistorial() || ($reserva->lastHistorial()->entrada && $reserva->lastHistorial()->salida)) {
             $fecha_reserva = $reserva->fecha ? Carbon::createFromFormat('Y-m-d', $reserva->fecha) : null;
             if ($fecha_reserva && now()->diffInHours($fecha_reserva, false) < 0) {
                 $reserva->estado = 0;
                 $reserva->save();
-                return response()->json(['message' => 'No se encontró una reserva válida o una reserva para el día de hoy'], 401);
-            }
-            if(!$reserva) {
                 return response()->json(['message' => 'No se encontró una reserva válida o una reserva para el día de hoy'], 401);
             }
     
