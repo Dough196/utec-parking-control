@@ -60,9 +60,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_lunes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_lunes.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_lunes' => ['required_with:hora_entrada_lunes'],
-            'hora_salida_lunes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_lunes.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_martes' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -74,9 +74,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_martes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_martes.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_martes' => ['required_with:hora_entrada_martes'],
-            'hora_salida_martes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_martes.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_miercoles' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -88,9 +88,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_miercoles.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_miercoles.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_miercoles' => ['required_with:hora_entrada_miercoles'],
-            'hora_salida_miercoles.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_miercoles.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_jueves' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -102,9 +102,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_jueves.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_jueves.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_jueves' => ['required_with:hora_entrada_jueves'],
-            'hora_salida_jueves.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_jueves.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_viernes' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -116,9 +116,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_viernes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_viernes.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_viernes' => ['required_with:hora_entrada_viernes'],
-            'hora_salida_viernes.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_viernes.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_sabado' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -130,9 +130,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_sabado.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_sabado.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_sabado' => ['required_with:hora_entrada_sabado'],
-            'hora_salida_sabado.*' => ['sometimes', 'date_format:H:i'],
+            'hora_salida_sabado.*' => ['nullable', 'date_format:H:i'],
             'hora_entrada_domingo' => [
                 Rule::requiredIf(function() use($request){
                     return !isset($request['hora_entrada_lunes']) &&
@@ -144,9 +144,9 @@ class ReservaController extends Controller
                 }),
                 'array'
             ],
-            'hora_entrada_domingo.*' => ['sometimes', 'date_format:H:i'],
+            'hora_entrada_domingo.*' => ['nullable', 'date_format:H:i'],
             'hora_salida_domingo' => ['required_with:hora_entrada_domingo'],
-            'hora_salida_domingo.*' => ['sometimes', 'date_format:H:i']
+            'hora_salida_domingo.*' => ['nullable', 'date_format:H:i']
         ]);
 
         // $edificio = Edificio::with('reservas')->find($request->edificio_id);
@@ -165,80 +165,94 @@ class ReservaController extends Controller
         ]);
 
         if(isset($request->hora_entrada_lunes)) {
-            for ($i=0; $i < count($request->hora_entrada_lunes); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Lunes',
-                    'num_dia' => 1,
-                    'hora_entrada' => $request->hora_entrada_lunes[$i],
-                    'hora_salida' => $request->hora_salida_lunes[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_lunes); $i++) {
+                if (!empty($request->hora_entrada_lunes[$i]) && !empty($request->hora_salida_lunes[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Lunes',
+                        'num_dia' => 1,
+                        'hora_entrada' => $request->hora_entrada_lunes[$i],
+                        'hora_salida' => $request->hora_salida_lunes[$i]
+                    ]));                    
+                }
             }
         }
 
         if(isset($request->hora_entrada_martes)) {
             for ($i=0; $i < count($request->hora_entrada_martes); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Martes',
-                    'num_dia' => 2,
-                    'hora_entrada' => $request->hora_entrada_martes[$i],
-                    'hora_salida' => $request->hora_salida_martes[$i]
-                ]));
+                if (!empty($request->hora_entrada_martes[$i]) && !empty($request->hora_salida_martes[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Martes',
+                        'num_dia' => 2,
+                        'hora_entrada' => $request->hora_entrada_martes[$i],
+                        'hora_salida' => $request->hora_salida_martes[$i]
+                    ]));
+                }
             }
         }
 
         if(isset($request->hora_entrada_miercoles)) {
-            for ($i=0; $i < count($request->hora_entrada_miercoles); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Miercoles',
-                    'num_dia' => 3,
-                    'hora_entrada' => $request->hora_entrada_miercoles[$i],
-                    'hora_salida' => $request->hora_salida_miercoles[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_miercoles); $i++) {
+                if (!empty($request->hora_entrada_miercoles[$i]) && !empty($request->hora_salida_miercoles[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Miercoles',
+                        'num_dia' => 3,
+                        'hora_entrada' => $request->hora_entrada_miercoles[$i],
+                        'hora_salida' => $request->hora_salida_miercoles[$i]
+                    ]));
+                }
             }
         }
 
         if(isset($request->hora_entrada_jueves)) {
-            for ($i=0; $i < count($request->hora_entrada_jueves); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Jueves',
-                    'num_dia' => 4,
-                    'hora_entrada' => $request->hora_entrada_jueves[$i],
-                    'hora_salida' => $request->hora_salida_jueves[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_jueves); $i++) {
+                if (!empty($request->hora_entrada_jueves[$i]) && !empty($request->hora_salida_jueves[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Jueves',
+                        'num_dia' => 4,
+                        'hora_entrada' => $request->hora_entrada_jueves[$i],
+                        'hora_salida' => $request->hora_salida_jueves[$i]
+                    ]));
+                }
             }
         }
 
         if(isset($request->hora_entrada_viernes)) {
-            for ($i=0; $i < count($request->hora_entrada_viernes); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Viernes',
-                    'num_dia' => 5,
-                    'hora_entrada' => $request->hora_entrada_viernes[$i],
-                    'hora_salida' => $request->hora_salida_viernes[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_viernes); $i++) {
+                if (!empty($request->hora_entrada_viernes[$i]) && !empty($request->hora_salida_viernes[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Viernes',
+                        'num_dia' => 5,
+                        'hora_entrada' => $request->hora_entrada_viernes[$i],
+                        'hora_salida' => $request->hora_salida_viernes[$i]
+                    ]));
+                }
             }
         }
 
         if(isset($request->hora_entrada_sabado)) {
-            for ($i=0; $i < count($request->hora_entrada_sabado); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Sábado',
-                    'num_dia' => 6,
-                    'hora_entrada' => $request->hora_entrada_sabado[$i],
-                    'hora_salida' => $request->hora_salida_sabado[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_sabado); $i++) {
+                if (!empty($request->hora_entrada_sabado[$i]) && !empty($request->hora_salida_sabado[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Sábado',
+                        'num_dia' => 6,
+                        'hora_entrada' => $request->hora_entrada_sabado[$i],
+                        'hora_salida' => $request->hora_salida_sabado[$i]
+                    ]));
+                }
             }
         }
 
 
         if(isset($request->hora_entrada_domingo)) {
-            for ($i=0; $i < count($request->hora_entrada_domingo); $i++) { 
-                $reserva->horarios()->save(new Horario([
-                    'dia' => 'Domingo',
-                    'num_dia' => 0,
-                    'hora_entrada' => $request->hora_entrada_domingo[$i],
-                    'hora_salida' => $request->hora_salida_domingo[$i]
-                ]));
+            for ($i=0; $i < count($request->hora_entrada_domingo); $i++) {
+                if (!empty($request->hora_entrada_domingo[$i]) && !empty($request->hora_salida_domingo[$i])) {
+                    $reserva->horarios()->save(new Horario([
+                        'dia' => 'Domingo',
+                        'num_dia' => 0,
+                        'hora_entrada' => $request->hora_entrada_domingo[$i],
+                        'hora_salida' => $request->hora_salida_domingo[$i]
+                    ]));
+                }
             }
         }
 
@@ -246,6 +260,32 @@ class ReservaController extends Controller
 
         return response()->json(
             ['reserva' => $reserva],
+            200
+        );
+    }
+
+    public function assignParkingToStudent(Request $request)
+    {
+        $this->validate($request, [
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'edificio_id' => ['required', 'integer', 'exists:edificios,id']
+        ]);
+        
+        $user = User::with('reservas.edificios')->find($request->user_id);
+
+        if ($user->rol_id != 4) {
+            return response()->json(['error' => 'El usuario debe de ser un estudiante'], 401);
+        }
+
+        $reserva = Reserva::create([
+            'estado' => 1
+        ]);
+        $user->reservas()->sync([$reserva->id => ['edificio_id' => $request->edificio_id]]);
+        $user->estado = 1;
+        $user->save();
+
+        return response()->json(
+            ['usuario' => $user],
             200
         );
     }

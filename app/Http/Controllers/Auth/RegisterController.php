@@ -115,7 +115,7 @@ class RegisterController extends Controller
                 'carnet' => isset($data['carnet']) ? $data['carnet'] : null,
                 'num_placa' => $data['num_placa'],
                 'password' => Hash::make($data['password']),
-                'estado' => 1,
+                'estado' => $data['rol_id'] == 4 ? 0 : 1,
                 'rol_id' => $data['rol_id'],
                 'api_token' => Str::random(80)
             ]);

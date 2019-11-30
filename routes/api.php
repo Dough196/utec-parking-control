@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/reservas/{id}', 'ReservaController@show');
     Route::get('/asignaciones/{id}', 'ReservaController@show');
     Route::post('/asignar-parqueo', 'ReservaController@assignParking');
+    Route::post('/asignar-parqueo-alumno', 'ReservaController@assignParkingToStudent');
     // Route::post('/reservar-parqueo', 'ReservaController@bookParking');
     Route::post('/reservar-parqueo', 'ReservaController@bookDayParking');
 

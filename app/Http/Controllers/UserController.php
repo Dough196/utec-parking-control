@@ -50,7 +50,26 @@ class UserController extends Controller
                 return response()->json([
                     'usuarios' => User::with('rol')->with('reservas.edificios')->whereHas('rol', function ($q) {
                         $q->where('id', 4);
-                    })->get()
+                    })
+                    ->get()
+                ], 200);
+                break;    
+            case 'alumno-activo':
+                return response()->json([
+                    'usuarios' => User::with('rol')->with('reservas.edificios')->whereHas('rol', function ($q) {
+                        $q->where('id', 4);
+                    })
+                    ->where('estado', 1)
+                    ->get()
+                ], 200);
+                break;
+            case 'alumno-inactivo':
+                return response()->json([
+                    'usuarios' => User::with('rol')->with('reservas.edificios')->whereHas('rol', function ($q) {
+                        $q->where('id', 4);
+                    })
+                    ->where('estado', 0)
+                    ->get()
                 ], 200);
                 break;
             case 'vigilante':
@@ -128,6 +147,9 @@ class UserController extends Controller
         //     $q->where('id', 1);
         // })
         
+        $user = User::find($request->user_id);
+
+        $validateSchedule = $user->rol_id != 4 ? true : null;
 
         $reserva = Reserva::with('users')
             ->with('horarios')
@@ -135,8 +157,10 @@ class UserController extends Controller
             ->whereHas('users', function ($q) use ($request) {
                 $q->where('users.id', $request->user_id);
             })
-            ->whereHas('horarios', function ($q) {
-                $q->where('num_dia', now()->dayOfWeek);
+            ->when($validateSchedule, function ($q) {
+                return $q->whereHas('horarios', function ($q) {
+                    $q->where('num_dia', now()->dayOfWeek);
+                });
             })
             ->where('estado', 1)->first();
         
@@ -153,13 +177,18 @@ class UserController extends Controller
             }
     
             $hasValidSchedule = false;
-            foreach ($reserva->horarios as $horario) {
-                // dd(Carbon::createFromFormat('H:s:i', $horario->hora_entrada));
-                $fecha_entrada = Carbon::createFromFormat('H:s:i', $horario->hora_entrada);
-                $fecha_salida = Carbon::createFromFormat('H:s:i', $horario->hora_salida);
-                if (now()->diffInMinutes($fecha_entrada, false) <= 30 && now()->diffInMinutes($fecha_salida, false) > 10) {
-                    $hasValidSchedule = true;
+
+            if ($validateSchedule) {
+                foreach ($reserva->horarios as $horario) {
+                    // dd(Carbon::createFromFormat('H:s:i', $horario->hora_entrada));
+                    $fecha_entrada = Carbon::createFromFormat('H:s:i', $horario->hora_entrada);
+                    $fecha_salida = Carbon::createFromFormat('H:s:i', $horario->hora_salida);
+                    if (now()->diffInMinutes($fecha_entrada, false) <= 30 && now()->diffInMinutes($fecha_salida, false) > 10) {
+                        $hasValidSchedule = true;
+                    }
                 }
+            } else {
+                $hasValidSchedule = true;
             }
             if (!$hasValidSchedule) {
                 return response()->json([
@@ -186,8 +215,10 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Validacion de entrada exitosa'
             ], 200);
-        } else {
+        } elseif ($reserva->lastHistorial()->entrada && !$reserva->lastHistorial()->salida) {
             return response()->json(['message' => 'Usuario ya se encuentra en el parqueo'], 200);
+        } else {
+            return response()->json(['message' => 'Hubo por favor intente más tarde'], 200);
         }
     }
 
@@ -216,6 +247,10 @@ class UserController extends Controller
         //     })->find($request->user_id);
 
         $reserva = Reserva::with('users')
+            // ->with(['historial' => function ($query) { 
+            //     $query->whereNotNull('entrada')
+            //         ->whereNull('salida')->latest()->first();
+            // }])
             ->with('historial')
             ->whereHas('users', function ($q) use ($request) {
                 $q->where('users.id', $request->user_id);
@@ -230,9 +265,9 @@ class UserController extends Controller
             return response()->json(['message' => 'No se ha registrado una entrada para este usuario'], 200);
         }
 
-        $reserva->historial[0]->salida = now()->toTimeString();
-        $reserva->historial[0]->comentario = isset($request->comentario) ?  $request->comentario : null;
-        $reserva->historial[0]->calificacion = isset($request->calificacion) ?  $request->calificacion : null;
+        $reserva->historial[count($reserva->historial) - 1]->salida = now()->toTimeString();
+        $reserva->historial[count($reserva->historial) - 1]->comentario = isset($request->comentario) ?  $request->comentario : null;
+        $reserva->historial[count($reserva->historial) - 1]->calificacion = isset($request->calificacion) ?  $request->calificacion : null;
         $reserva->push();
 
         // if (count($user->historial) && ($user->historial[0]->entrada && !$user->historial[0]->salida)) {
@@ -240,7 +275,7 @@ class UserController extends Controller
         //     $user->historial[0]->comentario = isset($request->comentario) ?  $request->comentario : null;
         //     $user->push();
 
-        $edificio = Edificio::find($reserva->historial[0]->edificio_id);
+        $edificio = Edificio::find($reserva->historial[count($reserva->historial) - 1]->edificio_id);
         $edificio->num_disponible = $edificio->num_disponible + 1;
         $edificio->num_ocupado = $edificio->num_ocupado - 1;
         $edificio->save();
