@@ -324,7 +324,7 @@ class ReservaController extends Controller
             'fecha' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'hora_entrada' => ['required', 'date_format:H:i'],
             'hora_salida' => ['required', 'date_format:H:i'],
-            'cantidad' => ['required', 'integer'],
+            'cantidad' => ['required', 'numeric', 'integer', 'min:0'],
             'comentario' => ['nullable', 'string', 'max:100']
         ]);
 

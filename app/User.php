@@ -62,4 +62,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Edificio', 'asignaciones')->withTimestamps();
     }
+
+    public function eventos()
+    {
+        return $this->hasMany('App\Evento');
+    }
 }

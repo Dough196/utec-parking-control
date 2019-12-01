@@ -49,6 +49,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/historial', 'HistorialController@index');
     Route::get('/historial/{id}', 'HistorialController@show');
 
+    Route::get('/eventos', 'EventoController@index');
+    Route::get('/eventos/{id}', 'EventoController@show');
+    Route::post('/crear-evento', 'EventoController@store');
 });
 
 Route::group(['middleware' => 'guest:api'], function () {

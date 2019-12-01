@@ -24,4 +24,9 @@ class Edificio extends Model
     //     $slots_ocupados = $this->reservas()->whereNotNull('num_slot')->pluck('num_slot');
     //     return array_values(array_diff($slots, $slots_ocupados->toArray()));
     // }
+
+    public function eventos()
+    {
+        return $this->hasMany('App\Evento');
+    }
 }

@@ -12,4 +12,9 @@ class Horario extends Model
     {
         return $this->belongsTo('App\Reserva');
     }
+
+    public function evento()
+    {
+        return $this->belongsTo('App\Evento');
+    }
 }
