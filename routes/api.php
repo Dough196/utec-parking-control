@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', function(Request $request) {
         $user = User::with('rol')
-            ->with('reservas.edificios')
+            ->with(['reservas.edificios', 'reservas.horarios'])
             ->with('edificios')
             ->find($request->user()->id);
         if ($user->rol_id != 5) {

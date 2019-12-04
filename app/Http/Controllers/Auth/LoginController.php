@@ -77,7 +77,7 @@ class LoginController extends Controller
 
         if ($this->attemptLogin($request)) {
             $user = User::with('rol')
-                ->with('reservas.edificios')
+                ->with(['reservas.edificios', 'reservas.horarios'])
                 ->with('edificios')
                 ->find($this->guard()->user()->id)
                 ->makeVisible(['api_token']);
