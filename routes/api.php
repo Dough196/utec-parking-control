@@ -15,8 +15,20 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', function(Request $request) {
+        $user = User::with('rol')
+            ->with('reservas.edificios')
+            ->with('edificios')
+            ->find($this->guard()->user()->id)
+            ->makeVisible(['api_token']);
+        if ($user->rol_id != 5) {
+            unset($user->edificios);
+        }
+        if ($user->rol_id == 5) {
+            unset($user->reservas);
+        }
+
         return response()->json([
-            'data' => $request->user()
+            'data' => $user
         ], 200);
     });
 
@@ -48,6 +60,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('/historial', 'HistorialController@index');
     Route::get('/historial/{id}', 'HistorialController@show');
+    Route::post('/historial/agregar-comentario', 'HistorialController@addComment');
 
     Route::get('/eventos', 'EventoController@index');
     Route::get('/eventos/{id}', 'EventoController@show');

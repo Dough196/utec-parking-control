@@ -122,30 +122,6 @@ class UserController extends Controller
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'edificio_id' => ['required', 'integer', 'exists:edificios,id']
         ]);
-
-        // $user = User::with(['historial' => function ($query) { 
-        //         $query->latest()->first();
-        // }])->find($request->user_id);
-
-        // if (!count($user->historial) || ($user->historial[0]->entrada && $user->historial[0]->salida)) {
-        //     $user->historial()->save(new Historial([
-        //         'edificio_id' => $request->edificio_id,
-        //         'entrada' => Carbon::now()->toTimeString(),
-        //         'fecha' => Carbon::today()->toDateString()
-        //     ]));
-        //     $edificio = Edificio::find($request->edificio_id);
-        //     $edificio->num_disponible = $edificio->num_disponible - 1;
-        //     $edificio->num_ocupado = $edificio->num_ocupado + 1;
-        //     $edificio->save();
-        //     return $user;
-        // } elseif ($user->historial[0]->entrada && !$user->historial[0]->salida) {
-        //     return response()->json(['message' => 'Usuario ya se encuentra en el parqueo'], 200);
-        // } else {
-        //     return response()->json(['message' => 'Hubo un error comuniquese con el administrador'], 200);
-        // }
-        // ->whereHas('edificios', function ($q) {
-        //     $q->where('id', 1);
-        // })
         
         $user = User::find($request->user_id);
 
@@ -230,27 +206,7 @@ class UserController extends Controller
             'calificacion' => ['nullable', 'numeric', 'integer', 'between:0,5']
         ]);
 
-        // dd($request);
-
-        // $reserva = Reserva::with
-
-        // $reserva = Reserva::with(['historial' => function ($query) { 
-        //         $query->latest()->first();
-        //     }])->with('users')
-        //     ->with('horarios')
-        //     ->with('edificios')
-        //     ->whereHas('users', function ($q) use ($request) {
-        //         $q->where('users.id', $request->user_id);
-        //     })
-        //     ->whereHas('horarios', function ($q) {
-        //         $q->where('num_dia', now()->dayOfWeek);
-        //     })->find($request->user_id);
-
         $reserva = Reserva::with('users')
-            // ->with(['historial' => function ($query) { 
-            //     $query->whereNotNull('entrada')
-            //         ->whereNull('salida')->latest()->first();
-            // }])
             ->with('historial')
             ->whereHas('users', function ($q) use ($request) {
                 $q->where('users.id', $request->user_id);
@@ -270,19 +226,10 @@ class UserController extends Controller
         $reserva->historial[count($reserva->historial) - 1]->calificacion = isset($request->calificacion) ?  $request->calificacion : null;
         $reserva->push();
 
-        // if (count($user->historial) && ($user->historial[0]->entrada && !$user->historial[0]->salida)) {
-        //     $user->historial[0]->salida = Carbon::now()->toTimeString();
-        //     $user->historial[0]->comentario = isset($request->comentario) ?  $request->comentario : null;
-        //     $user->push();
-
         $edificio = Edificio::find($reserva->historial[count($reserva->historial) - 1]->edificio_id);
         $edificio->num_disponible = $edificio->num_disponible + 1;
         $edificio->num_ocupado = $edificio->num_ocupado - 1;
         $edificio->save();
-        //     return $user;
-        // } else {
-        //     return response()->json(['message' => 'No se ha registrado una entrada para este usuario'], 200);
-        // }
 
         return response()->json([
             'message' => 'Validacion de salida exitosa'

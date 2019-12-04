@@ -149,17 +149,6 @@ class ReservaController extends Controller
             'hora_salida_domingo.*' => ['nullable', 'date_format:H:i']
         ]);
 
-        // $edificio = Edificio::with('reservas')->find($request->edificio_id);
-
-        // $edificio->reservas()->save(new Reserva([
-        //     'estado' => 1,
-        //     'num_slot' => 0
-        // ]));
-        // $edificio->save();
-
-        // $user = User::with('horarios')->find($request->user_id);
-        // $user->reserva_id = $edificio->reservas()->latest()->first()->id;
-
         $reserva = Reserva::create([
             'estado' => 1
         ]);
@@ -330,20 +319,7 @@ class ReservaController extends Controller
 
         $dias = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado'];
         $fecha = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $request->hora_entrada);
-
-        // $edificio = Edificio::find($request->edificio_id);
-        // $edificio->reservas()->save(new Reserva([
-        //     'estado' => 1,
-        //     'num_slot' => $edificio->slots_disponibles[0],
-        //     'fecha' => $request->fecha
-        // ]));
-
-        // $edificio->save();
-
-        // $user = User::with('reserva')->with('horarios')->find($request->user_id);
-        // $user->reserva_id = $edificio->reservas()->latest()->first()->id;
-
-        
+      
         for ($i=0; $i < $request->cantidad; $i++) { 
             $reserva = Reserva::create([
                 'estado' => 1,

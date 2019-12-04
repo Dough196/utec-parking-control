@@ -89,8 +89,7 @@ class LoginController extends Controller
             }
 
             return response()->json([
-                'data' => $user->toArray(),
-                'token' => $user->api_token
+                'data' => $user->toArray()
             ]);
         }
 
