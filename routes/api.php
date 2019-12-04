@@ -19,8 +19,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         $user = User::with('rol')
             ->with('reservas.edificios')
             ->with('edificios')
-            ->find($request->user()->id)
-            ->makeVisible(['api_token']);
+            ->find($request->user()->id);
         if ($user->rol_id != 5) {
             unset($user->edificios);
         }
