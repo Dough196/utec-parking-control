@@ -78,6 +78,7 @@ class RegisterController extends Controller
                 Rule::requiredIf(function () use ($data){
                     return $data['rol_id'] == 4;
                 }),
+                'nullable',
                 'string',
                 'min:12',
                 'max:12',
