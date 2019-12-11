@@ -90,6 +90,7 @@ class RegisterController extends Controller
                 Rule::requiredIf(function () use ($data){
                     return in_array($data['rol_id'], [1, 2, 3, 4]);
                 }),
+                'nullable',
                 'string',
                 'max:15',
                 'unique:users'
