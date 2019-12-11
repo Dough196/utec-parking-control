@@ -1,1 +1,6 @@
-Nombres,Apellidos,E-mail,Placa,Edificio,Numero de Slot,Rol
+Nombres,Apellidos,Correo,Carnet,Placa,Contraseña,Confirmar contraseña,Rol
+Katy,Morales,katy@gmail.com,25-6542-4521,9630-9620,password,password,estudiante
+Daniel,Morales,daniel@gmail.com,,9630-9621,password,password,estudiante
+Kevin,Morales,kevin@gmail.com,,9630-9621,password,password,vigilante
+josh,Morales,josh@gmail.com,25-6542-4524,9630-9621,password,password,docente
+josh,Morales,josh2@gmail.com,25-6542-4524,9630-9621,password,password,docente

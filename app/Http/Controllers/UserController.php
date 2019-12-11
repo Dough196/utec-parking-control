@@ -7,7 +7,11 @@ use App\Reserva;
 use App\Edificio;
 use App\Historial;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -251,10 +255,8 @@ class UserController extends Controller
             if ($header) {
                 if (!$this->validateHeaders($csvLine)) {
                     return response()->json([
-                        'success' => false,
-                        'title' => 'ERROR',
-                        'message' => 'Por favor asegurese de utilizar la plantilla correcta'
-                    ]);
+                        'error' => 'Por favor asegurese de utilizar la plantilla correcta'
+                    ], 401);
                 }
                 $header = false;
             } else {
@@ -262,16 +264,58 @@ class UserController extends Controller
                 $user->nombres = $csvLine[0];
                 $user->apellidos = $csvLine[1];
                 $user->email = $csvLine[2];
-                $user->num_placa = $csvLine[3];
-                $user->edificio = $csvLine[4];
-                $user->no_slot = $csvLine[5];
-                $user->$rol = $csvLine[6];
+                $user->carnet = $csvLine[3];
+                $user->num_placa = $csvLine[4];
+                $user->password = $csvLine[5];
+                $user->password_confirmation = $csvLine[6];
+                $user->makeVisible('password');
+                switch ($csvLine[7]) {
+                    case 'admin':
+                        $user->rol_id = 1;
+                        break;
+                    case 'personal-administrativo':
+                        $user->rol_id = 2;
+                        break;
+                    case 'docente':
+                        $user->rol_id = 3;
+                        break;
+                    case 'estudiante':
+                        $user->rol_id = 4;
+                        break;
+                    case 'vigilante':
+                        $user->rol_id = 5;
+                        break;
+                    default:
+                        $user->rol_id = null;
+                        break;
+                }
 
                 $validator = $this->validateCSVColumns($user);
-
+                
                 if (!$validator->fails()) {
-                    $user = $this->unsetNotUsedFields($user);
-                    $user->save();
+                    if ($user->rol_id == 5) {
+                        User::create([
+                            'nombres' => $user->nombres,
+                            'apellidos' => $user->apellidos,
+                            'email' => $user->email,
+                            'password' => Hash::make($user->password),
+                            'estado' => 1,
+                            'rol_id' => $user->rol_id,
+                            'api_token' => Str::random(80)
+                        ]);
+                    } else {
+                        User::create([
+                            'nombres' => $user->nombres,
+                            'apellidos' => $user->apellidos,
+                            'email' => $user->email,
+                            'carnet' => isset($user->carnet) && $user->rol_id == 4 ? $user->carnet : null,
+                            'num_placa' => $user->num_placa,
+                            'password' => Hash::make($user->password),
+                            'estado' => $user->rol_id == 4 ? 0 : 1,
+                            'rol_id' => $user->rol_id,
+                            'api_token' => Str::random(80)
+                        ]);
+                    }
                 } else {
                     $errors[$i] = $validator->errors();
                 }
@@ -279,8 +323,6 @@ class UserController extends Controller
             $i++;
         }
         return response()->json([
-            'success' => true,
-            'message' => 'created',
             'uploaded' => ($i - 1) - count($errors),
             'processed' => ($i - 1),
             'failed' => count($errors),
@@ -311,10 +353,11 @@ class UserController extends Controller
         $admitted_headers = [
             'Nombres',
             'Apellidos',
-            'E-mail',
+            'Correo',
+            'Carnet',
             'Placa',
-            'Edificio',
-            'Numero de Slot',
+            'Contraseña',
+            'Confirmar contraseña',
             'Rol'
         ];
 
@@ -327,10 +370,27 @@ class UserController extends Controller
             'nombres' => ['required', 'string', 'max:75'],
             'apellidos' => ['required', 'string', 'max:75'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'num_placa' => ['required', 'string', 'max:15'],
-            'edificio' => ['required', 'string', 'max:60'],
-            'no_slot' => ['required', 'numeric'],
-            'rol' => ['required', 'string', 'max:75'],
+            'carnet' => [
+                Rule::requiredIf(function () use ($data){
+                    return $data['rol_id'] == 4;
+                }),
+                'nullable',
+                'string',
+                'min:12',
+                'max:12',
+                'unique:users'
+            ],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'rol_id' => ['required', 'integer', 'exists:roles,id'],
+            'num_placa' => [
+                Rule::requiredIf(function () use ($data){
+                    return in_array($data['rol_id'], [1, 2, 3, 4]);
+                }),
+                'nullable',
+                'string',
+                'max:15',
+                'unique:users'
+            ]
         ]);
     }
 
