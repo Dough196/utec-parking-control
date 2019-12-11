@@ -74,7 +74,15 @@ class RegisterController extends Controller
             'nombres' => ['required', 'string', 'max:75'],
             'apellidos' => ['required', 'string', 'max:75'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'carnet' => ['required_if:rol_id,4', 'string', 'min:12', 'max:12', 'unique:users'],
+            'carnet' => [
+                Rule::requiredIf(function () use ($data){
+                    return $data['rol_id'] == 4;
+                }),
+                'string',
+                'min:12',
+                'max:12',
+                'unique:users'
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'rol_id' => ['required', 'integer', 'exists:roles,id'],
             'num_placa' => [
