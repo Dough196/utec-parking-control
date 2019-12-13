@@ -222,7 +222,7 @@ class UserController extends Controller
             ->first();
         
         if (!$reserva) {
-            return response()->json(['message' => 'No se ha registrado una entrada para este usuario'], 200);
+            return response()->json(['message' => 'No se ha registrado una entrada para este usuario'], 401);
         }
 
         $reserva->historial[count($reserva->historial) - 1]->salida = now()->toTimeString();
